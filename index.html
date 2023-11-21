@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>ExpressionLanguage in Symfony - Beyond the framework - Rémi Janot - SymfonyCon 2023</title>
+
+		<meta name="description" content="Expression Language (EL) is a powerful tool that can be used to dynamically evaluate expressions in Symfony applications. However, EL is often overlooked for use in the business domain.">
+		<meta name="author" content="Rémi Janot">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/white.css" id="theme">
+		<style>
+			:root {
+				--r-heading-margin: 0 0 40px 0;
+				--r-block-margin: 40px;
+			}
+			li {
+				margin-bottom: 15px;
+			}
+			.reveal pre {
+				margin: 0;
+				width: 100%;
+			}
+		</style>
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h3>Expression language in Symfony</h3>
+					<p>
+						<small>Beyond the Framework</small>
+					</p>
+					<p>
+						<img src="./images/sfcon-brussels2023.png" height="150"/>
+					</p>
+				</section>
+
+				<section>
+					<h3>About me</h3>
+					<table>
+						<tr>
+							<td width="33%">
+								<div class="fragment" style="text-align: center">
+									<p>Live in France<p></p>
+									<img src="./images/where-i-live.png" height="260" />
+								</div>
+							</td>
+							<td width="33%">
+								<div class="fragment" style="text-align: center">
+									<p>AFOL</p>
+									<img src="https://placekitten.com/300/450" height="260" />
+								</div>
+							</td>
+							<td width="33%">
+								<div class="fragment" style="text-align: center">
+									<p>Comedian</p>
+									<img src="./images/comedian.jpg" height="260"/>
+								</div>
+							</td>
+						</tr>
+					</table>
+					<aside class="notes">
+						That explains my English accent. Just to be sure, does everybody understand me?
+
+						- Fun fact, my city has a binary postal code
+						- The Titanic, my personal biggest Lego, more than 9 thousands bricks
+					</aside>
+				</section>
+
+				<section>
+					<h3>About me & my work</h3>
+					<div>
+						<p>20 years working in IT<p></p>
+					</div>
+				</section>
+
+				<section>
+					<h3>About me & my work</h3>
+					<div>
+						<p>Co-founder & CTO at Wheeliz</p>
+						<img src="./images/wheeliz.webp" height="300" />
+					</div>
+				</section>
+
+				<section>
+					<h3>About me & my work</h3>
+					<div>
+						<p>Co-founder & CTO at Vasco.fund</p>
+						<img src="./images/illustration_vasco.png" height="300" />
+					</div>
+				</section>
+
+				<section>
+					<h3 class="r-fit-text">Creating a Startup</h3>
+					<p>
+						« How to change anything As Fast As POSSIBLE »
+					</p>
+				</section>
+
+				<section>
+					<h3>Friday 6 p.m.</h3>
+					<p class="fragment">
+						<small>« Hey Rémi ! 👋 We send a newsletter in a few minutes because Sunday is Mothers’ Day. But we would like to try a new discount code that make… »</small>
+					</p>
+					<p class="fragment">
+						<small>« Hey Rémi ! 👋 We send a newsletter in a few minutes. We have created the discount code of 10€ but it should only be usable by users which… »</small>
+					</p>
+				</section>
+
+				<section>
+					<h3 class="r-fit-text">Creating a SAAS Startup</h3>
+					<p>
+						« How to change anything As Fast As LIGHTNING »
+					</p>
+				</section>
+
+				<section>
+					<h3>What does Vasco.fund do ?</h3>
+					<p class="fragment">
+						Vasco is a software dedicated to private banking and small & medium asset managers.
+					</p>
+					<p class="fragment">
+						These professions are required to ask many financial questions : KYC (Know Your Customer)
+					</p>
+					<p class="fragment">
+						They have plenty of questions to ask
+					</p>
+
+					<aside class="notes">
+						Do you remember when you had to fill paper form?
+						Question 36: if you have answered yes to former question, skip directly to question 59
+						Easy on paper. I don’t know for you, but I can not imagine something similar on a webapp.
+						So I have to put a condition before displaying my question
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<h3 data-id="code-title">Create the question entity</h3>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|5-11|13-16|18-28|30-40">
+						namespace App\Entity;
+						// use ...
+						class KycQuestion
+						{
+							private ?int $id = null;
+
+							#[Assert\NotBlank]
+							private ?string $question;
+
+							#[Assert\NotBlank]
+							private ?string $condition = null;
+
+							public function getId(): ?int
+							{
+								return $this->id;
+							}
+
+							public function getQuestion(): ?string
+							{
+								return $this->kycStep;
+							}
+
+							public function setQuestion(?string $question): self
+							{
+								$this->question = $question;
+
+								return $this;
+							}
+
+							public function getCondition(): ?string
+							{
+								return $this->condition;
+							}
+
+							public function setCondition(string $condition): self
+							{
+								$this->condition = $condition;
+
+								return $this;
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Monday 10 a.m.</h3>
+					<p class="fragment">
+						<small>« Hey Rémi ! 👋 Customer A would like to have a question only in case X »</small>
+					</p>
+					<div class="fragment">
+						<h3>Tuesday 2 p.m.</h3>
+						<p>
+							<small>« Hey Rémi ! 👋 Customer B would like to have a question only in case Y »</small>
+						</p>
+					</div>
+					<div class="fragment">
+						<h3>Wednesday 11 a.m.</h3>
+						<p>
+							<small>« Hey Rémi ! 👋 Customer C would like to have a question only in case Z »</small>
+						</p>
+					</div>
+				</section>
+
+				<section>
+					<h3>What are cases X, Y and Z ?</h3>
+					<table>
+						<tr>
+							<th>Ask for ...</th>
+							<th>... if the user filling the form ...</th>
+						</tr>
+						<tr>
+							<th>Maiden Name</th>
+							<td>Is a woman</td>
+						</tr>
+						<tr>
+							<th>Corporate name</th>
+							<td>Is a company</td>
+						</tr>
+						<tr>
+							<th>Siren</th>
+							<td>Is a French company</td>
+						</tr>
+						<tr>
+							<th>Funds origin</th>
+							<td>Has invested more than 100k€</td>
+						</tr>
+						<tr>
+							<th>Detailed explanations</th>
+							<td>If the IBAN start with a country different than the fiscal country</td>
+						</tr>
+					</table>
+					<aside class="notes">
+						We can have simple conditions, depending on the entity we are filling:
+						You can have conditions with logical operators : is a Company AND fiscal address in France
+						You can also have conditions that depends on totally different objects
+						You can also have some conditions extracting data before comparison
+					</aside>
+				</section>
+
+				<section>
+					<h3>1st solution</h3>
+					<ul>
+						<li>List every simple case that may arrived</li>
+						<li>List combinations of these cases</li>
+						<li>Name these cases</li>
+						<li>Create an SQL snippet for every cases</li>
+					</ul>
+				</section>
+
+				<section data-auto-animate>
+					<h3>SQL query to get questions</h3>
+					<pre data-id="code-animation"><code class="hljs sql" data-trim data-line-numbers="4-11|13-20|22-30|32-40|42-50">
+						SELECT *
+						FROM kyc_question
+						WHERE
+						(
+							kyc_question.condition == 'isWoman'
+							AND (
+								SELECT 1
+								FROM user
+								WHERE id=:loggedInUserId AND gender = 'woman'
+							)
+						)
+						OR
+						(
+							kyc_question.condition == 'isCompany'
+							AND (
+								SELECT 1
+								FROM user
+								WHERE id=:loggedInUserId AND type = 'company'
+							)
+						)
+						OR
+						(
+							kyc_question.condition == 'isFrenchCompany'
+							AND (
+								SELECT 1
+								FROM user
+								WHERE id=:loggedInUserId AND type = 'company'
+								AND country = 'FR'
+							)
+						)
+						OR
+						(
+							kyc_question.condition == 'hasInvestedMoreThan100k'
+							AND (
+								SELECT 1
+								FROM user
+								WHERE id=:loggedInUserId
+								AND cumulatedInvestment >= 100000
+							)
+						)
+						OR
+						(
+							kyc_question.condition == 'sameCountry'
+							AND (
+								SELECT 1
+								FROM user
+								WHERE id=:loggedInUserId
+								AND country = SUBSTR(iban, 1, 2)
+							)
+						)
+						/* ... */
+					</code></pre>
+
+					<aside class="notes">
+						It works !
+						Any ideas for the next step ?
+					</aside>
+				</section>
+
+				<section>
+					<h3>It works !</h3>
+					<p>🚀</p>
+				</section>
+
+				<section>
+					<h3>1st solution</h3>
+					<ul>
+						<li>List every simple case that may arrived</li>
+						<li>List combinations of these cases</li>
+						<li>Name these cases</li>
+						<li>Create an SQL snippet for every cases</li>
+						<li class="fragment">Cross fingers</li>
+					</ul>
+
+					<aside class="notes">
+						Any of my customers may want to ask something when the user invested more than 1M€ or any other new conditions
+					</aside>
+				</section>
+
+				<section>
+					<h3>Drawback of the 1st solution 🤔</h3>
+					<ul>
+						<li>Complex query</li>
+						<li>Many dead code depending on the SaaS configuration</li>
+						<li>Need a developer to add a new condition</li>
+						<li>Need a release to add a new condition</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>2nd solution</h3>
+					<p>
+						Need to keep the condition field
+					</p>
+					<p>
+						Evaluate in PHP
+					</p>
+				</section>
+
+				<section data-auto-animate>
+					<h3 data-id="code-title">Create the question repository</h3>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|3-13|8|15-30">
+						class QuestionRepository
+						{
+							public function findQuestionsForUser(User $user)
+							{
+								$toReturn = [];
+								foreach($this->findAll() as $question) {
+									if ($this->isRelevant($question, $user)) {
+										$toReturn[] = $question;
+									}
+								}
+								return $toReturn;
+							}
+
+							public function isRelevant(KycQuestion $question, User $user): bool
+							{
+								switch($question->getCondition()) {
+									case 'isWoman':
+										return $user->getGender() === 'woman';
+									case 'isCompany':
+										return $user->getType() === 'company';
+									case 'isFrenchCompany':
+										return $user->getType() === 'company' && $user->getCountry() === 'FR';
+									case 'hasInvestedMoreThan100k€':
+										return $user->getCumulatedInvestment() >= 100000;
+									case 'sameCountry':
+										return $user->getCountry() !== substr($user->getIban(), 0, 2);
+								}
+								throw new \OutOfBoundsException();
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section data-auto-animate>
+					<h3>2nd solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
+						<li>Many dead code depending on the SaaS configuration</li>
+						<li>Need a developer to add a new condition</li>
+						<li>Need a release to add a new condition</li>
+					</ul>
+				</section>
+
+				<section data-auto-animate>
+					<h3>3rd solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
+						<li>Many dead code depending on the SaaS configuration</li>
+						<li>Need a developer to add a new condition</li>
+						<li>
+							<strike>Need a release to add a new condition</strike><br>
+							<em>⇒ put the PHP condition code in the DB</em>
+						</li>
+					</ul>
+				</section>
+
+				<section data-auto-animate>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|7">
+						class QuestionRepository
+						{
+							//...
+
+							public function isRelevant(KycQuestion $question, User $user): bool
+							{
+								return eval($question->getCondition());
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section data-auto-animate>
+					<h3>3rd solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
+						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
+						<li>Need a developer to add a new condition</li>
+						<li>
+							<strike>Need a release to add a new condition</strike>
+						</li>
+					</ul>
+				</section>
+
+				<section data-background-color="darkred" data-auto-animate style="color: white">
+					<h3>CRITICAL SECURITY ISSUE</h3>
+					<p class="fragment">Variables can be read or changed</p>
+					<p class="fragment">Dangerous functions accessible, can alter system files</p>
+
+					<aside class="notes">
+						Why do you have a huge security issue ?
+
+						Because your PHP code will not be executed in a safe environment
+						If someone succeed to put his own PHP code in your DB, you are dead. The hacker can delete file, send customer files to him, read your passwords and other secrets
+
+						NEVER DO THAT
+
+						By the way, I hope you knew that before coming here
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<blockquote cite="https://www.oreilly.com/library/view/php-in-a/0596100671/re47.html">
+						<p>If eval() is the answer, you're almost certainly asking the wrong question.</p>
+					</blockquote>
+					<footer style="display: flex; align-items: center; justify-content: center">
+						<img align="left" src="./images/rasmus.png" width="100" style="margin: 0 20px 0 0; border-radius: 100px">
+						<span>-- Rasmus Lerdorf, BDFL of PHP</span>
+					</footer>
+
+					<aside class="notes">
+						I can not find when and where Rasmus said that, but I agree with that
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<blockquote>
+						<p>Rémi, you are supposed to talk about Expression Language <span style="font-style: normal">😕</span></p>
+					</blockquote>
+					<footer style="display: flex; align-items: center; justify-content: center">
+						<img align="left" src="./images/fabpot.png" width="100" style="margin: 0 20px 0 0; border-radius: 100px">
+						<span>-- Fabien Potencier, project lead at Symfony</span>
+					</footer>
+
+					<aside class="notes">
+						I can not find when and where Fabien said that, but I agree with that
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<h3>What is Expression Language</h3>
+					<ul>
+						<li>
+							Really simple programmation language
+							<ul>
+								<li>Only one liner</li>
+								<li>A very restricted PHP sandbox : No functions given by default</li>
+							</ul>
+						</li>
+						<li class="fragment">
+							Used in Symfony Core
+							<ul class="fragment">
+								<li>Introduced in September 2013, in Symfony 2.4</li>
+							</ul>
+						</li>
+						<li class="fragment">The expression can be evaluated at runtime or compiled into PHP</li>
+					</ul>
+				</section>
+
+				<section data-auto-animate>
+					<h4>Usage of ExpressionLanguage in Symfony Core</h4>
+					<h6 style="font-style: italic">Dependency Injection</h6>
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="8">
+						services:
+							# ...
+
+							App\Mail\MailerConfiguration: ~
+
+							App\Mailer:
+								# the '@=' prefix is required when using expressions for arguments in YAML files
+								arguments: ['@=service("App\\Mail\\MailerConfiguration").getMailerMethod()']
+
+								# when using double-quoted strings, the backslash needs to be escaped twice (see https://yaml.org/spec/1.2/spec.html#id2787109)
+								# arguments: ["@=service('App\\\\Mail\\\\MailerConfiguration').getMailerMethod()"]
+					</code></pre>
+					<small>
+						<a href="https://symfony.com/doc/current/service_container/expression_language.html">https://symfony.com/doc/current/service_container/expression_language.html</a>
+					</small>
+					<aside class="notes">
+						In yaml files, the expression start by @= and is compiled in an executable PHP code
+						Remember, it uses only the given environment and function. So, if you don’t provide functions like fopen or curl_*, nor you don’t call any function calling them, the compilation result will be secured
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<h4>Usage of ExpressionLanguage in Symfony Core</h4>
+					<h6 style="font-style: italic">Security</h6>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="9-11">
+						namespace App\Controller;
+
+						use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+						use Symfony\Component\ExpressionLanguage\Expression;
+						use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+						class MyController extends AbstractController
+						{
+							#[IsGranted(new Expression(
+								'is_granted("ROLE_ADMIN") or is_granted("ROLE_MANAGER")'
+							))]
+							public function show()
+							{
+								// ...
+							}
+						}
+					</code></pre>
+					<small>
+						<a href="https://symfony.com/doc/current/security/expressions.html">https://symfony.com/doc/current/security/expressions.html</a>
+					</small>
+				</section>
+
+				<section data-auto-animate>
+					<h4>Usage of ExpressionLanguage in Symfony Core</h4>
+					<h6 style="font-style: italic">Routing</h6>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="11-14|17">
+						namespace App\Controller;
+
+						use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+						use Symfony\Component\Routing\Annotation\Route;
+
+						class DefaultController extends AbstractController
+						{
+							#[Route(
+								'/contact',
+								name: 'contact',
+								condition: "
+									context.getMethod() in ['GET', 'HEAD']
+									and request.headers.get('User-Agent') matches '/firefox/i'
+								",
+
+								// expressions can also include config parameters:
+								// condition: "request.headers.get('User-Agent') matches '%app.allowed_browsers%'"
+							)]
+							public function contact()
+							{
+								// ...
+							}
+					</code></pre>
+					<small>
+						<a href="https://symfony.com/doc/current/routing.html#matching-expressions">https://symfony.com/doc/current/routing.html#matching-expressions</a>
+					</small>
+				</section>
+
+				<section data-auto-animate>
+					<h4>Usage of ExpressionLanguage in Symfony Core</h4>
+					<h6 style="font-style: italic">Validation</h6>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="5-9">
+						namespace App\Model;
+
+						use Symfony\Component\Validator\Constraints as Assert;
+
+						#[Assert\Expression(
+							"this.getCategory() in ['php', 'symfony']
+							or !this.isTechnicalPost()",
+							message: 'If this is a tech post, the category should be either php or symfony!',
+						)]
+						class BlogPost
+						{
+							// ...
+						}
+					</code></pre>
+					<small>
+						<a href="https://symfony.com/doc/current/reference/constraints/Expression.html">https://symfony.com/doc/current/reference/constraints/Expression.html</a>
+					</small>
+				</section>
+
+				<section data-auto-animate>
+					<h4>Usage of ExpressionLanguage in Symfony Core</h4>
+					<h6 style="font-style: italic">Workflows</h6>
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="6">
+						framework:
+							workflows:
+								blog_publishing:
+									transitions:
+										reject:
+											guard: "is_granted('ROLE_ADMIN') and subject.isRejectable()"
+											from: reviewed
+											to:   rejected
+					</code></pre>
+					<small>
+						<a href="https://symfony.com/doc/current/workflow.html#blocking-transitions">https://symfony.com/doc/current/workflow.html#blocking-transitions</a>
+					</small>
+				</section>
+
+				<section data-auto-animate>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|7">
+						class QuestionRepository
+						{
+							//...
+
+							public function isRelevant(KycQuestion $question, User $user): bool
+							{
+								// ExpressionLanguage evaluation here
+							}
+						}
+					</code></pre>
+					<aside class="notes">
+						Oh wait a minute, I feel that this component will fit exactly here !
+					</aside>
+				</section>
+
+				<section>
+					<h3>4rd solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
+						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
+						<li>Need a developer to add a new condition</li>
+						<li>
+							<strike>Need a release to add a new condition</strike>
+						</li>
+						<li>
+							<strike>Critical security issue</strike>
+						</li>
+					</ul>
+					<aside class="notes">
+						And as it is secured, I won't have the critical security issue anymore
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<h3 data-id="code-title">Create your own Expression Language</h3>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="7|4-5|9-14">
+						namespace App\Service;
+
+						use Psr\Cache\CacheItemPoolInterface;
+						use Symfony\Component\ExpressionLanguage\ExpressionLanguage
+							as BaseExpressionLanguage;
+
+						class ExpressionLanguage extends BaseExpressionLanguage
+						{
+							public function __construct(
+								CacheItemPoolInterface $cache = null,
+								array $providers = []
+							) {
+								parent::__construct($cache, $providers);
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3 data-id="code-title">Use your own Expression Language</h3>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="3-6|13|14|15-18">
+						class QuestionRepository
+						{
+							public function __construct(
+								private \App\Service\ExpressionLanguage $expressionLanguage,
+								private \Symfony\Component\Serializer\NormalizerNormalizerInterface $normalizer
+							)
+							{
+							}
+							//...
+
+							public function isRelevant(KycQuestion $question, User $user): bool
+							{
+								return $this->expressionLanguage->evaluate(
+									$question->getCondition(),
+									[
+										'question' => $this->normalizer->normalize($question),
+										'user' => $this->normalizer->normalize($user),
+									]
+								);
+							}
+						}
+					</code></pre>
+					<aside class="notes">
+						We inject our new service in the repository
+						And update isRelevant to use it. We give the question's condition as the expression to evaluate
+						And we give some context.
+						Important the context is using normalized values, it meens it is some associative arrays.
+						If you give the object, you can call getters. But you could also call setters and it might be a good idea only in some rare edge cases.
+					</aside>
+				</section>
+
+				<section>
+					<h3>Expressions</h3>
+					<table>
+						<tr>
+							<th>Ask for ...</th>
+							<th>... with this expression ...</th>
+						</tr>
+						<tr>
+							<th>Maiden Name</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>user.getGender() === 'woman'</code></pre>
+							</td>
+						</tr>
+						<tr>
+							<th>Corporate name</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>user.getType() === 'company'</code></pre>
+							</td>
+						</tr>
+						<tr>
+							<th>Siren</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>
+									user.getType() === 'company'
+									and
+									user.getCountry() === 'FR'
+								</code></pre>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section>
+					<h3>Expressions</h3>
+					<table>
+						<tr>
+							<th>Ask for ...</th>
+							<th>... with this expression ...</th>
+						</tr>
+						<tr>
+							<th>Funds origin</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>
+									getCumulatedInvestment(user) >= 100000
+								</code></pre>
+							</td>
+						</tr>
+						<tr>
+							<th>Detailed explanations</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>
+									user.getCountry() !== substr(user.getIban(), 0, 2)
+								</code></pre>
+							</td>
+						</tr>
+					</table>
+				</section>
+
+				<section>
+					<h3>SyntaxError</h3>
+					<p>The function "getCumulatedInvestment" does not exist around position 1 for expression `getCumulatedInvestment(user) >= 100000`.</p>
+					<p>The function "substr" does not exist around position 26 for expression `account.getCountry() !== substr(account.getIban(), 0, 2)`.</p>
+				</section>
+
+				<section>
+					<h3>Register your own functions</h3>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|11">
+						namespace App\Service;
+
+						use Psr\Cache\CacheItemPoolInterface;
+						use Symfony\Component\ExpressionLanguage\ExpressionLanguage
+							as BaseExpressionLanguage;
+
+						class ExpressionLanguage extends BaseExpressionLanguage
+						{
+							public function __construct(
+								CacheItemPoolInterface $cache = null,
+								array $providers = []
+							) {
+								parent::__construct($cache, $providers);
+							}
+						}
+					</code></pre>
+					<aside class="notes">
+						remember of this constructor ? The second parameter is a list of providers. But what does it provide ? If it was providing carots and cauliflower, we could stop world hunder.
+						But in fact it provides functions.
+						that's where I can define getCumulatedInvestment or substr functions
+					</aside>
+				</section>
+
+				<section>
+					<h3>Group your functions in Providers</h3>
+
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="4-5|7|9-11|10">
+						use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+						use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
+
+						class StringExpressionLanguageProvider
+							implements ExpressionFunctionProviderInterface
+						{
+							public function getFunctions(): array
+							{
+								return [
+									ExpressionFunction::fromPhp('substr')
+								];
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Group your functions in Providers</h3>
+
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="4-5|7-10|12|14-27|15|16-17|18-19|20-25">
+						use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+						use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
+
+						class TransactionExpressionLanguageProvider
+							implements ExpressionFunctionProviderInterface
+						{
+							public function __construct(
+								private EntityManagerInterface $entityManager
+							) {
+							}
+
+							public function getFunctions(): array
+							{
+								return [
+									new ExpressionFunction(
+										// name
+										'getCumulatedInvestment',
+										// compiler
+										function() {return '';},
+										// evaluator
+										function ($arguments, $user): int {
+											return $this->entityManager
+												->getRepository(Transaction::class)
+												->getCumulatedInvestment($user);
+										}
+									)
+								];
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section data-auto-animate>
+					<h3 data-id="code-title">Create your own Expression Language</h3>
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="2|3|5-6">
+					services:
+						expressionLanguage.kyc:
+							class: App\Service\ExpressionLanguage
+							arguments:
+								$providers:
+									- '@App\ELProvider\TransactionExpressionLanguageProvider'
+									- '@App\ELProvider\StringExpressionLanguageProvider'
+					</code></pre>
+					<aside class="notes">
+						The StringExpressionLanguageProvider May be injected in every ExpressionLanguage usages.
+						The provider in itself does not depends on anything else (no entity manager for example)
+						So we could choose to inject it in the Expression Language Constructor
+					</aside>
+				</section>
+
+				<section>
+					<h3>4rd solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
+						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
+						<li>
+							Need <strike>a developer</strike> someone knowing a little about the database schema / objects given and understanding this simple language to add a new condition
+
+						</li>
+						<li>
+							<strike>Need a release to add a new condition</strike>
+						</li>
+						<li>
+							<strike>Critical security issue</strike>
+						</li>
+					</ul>
+					<aside class="notes">
+						And as it is secured, I won't have the critical security issue anymore
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<h3>Optimize : Use cache</h3>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="10">
+						namespace App\Service;
+
+						use Psr\Cache\CacheItemPoolInterface;
+						use Symfony\Component\ExpressionLanguage\ExpressionLanguage
+							as BaseExpressionLanguage;
+
+						class ExpressionLanguage extends BaseExpressionLanguage
+						{
+							public function __construct(
+								CacheItemPoolInterface $cache = null,
+								array $providers = []
+							) {
+								// prepends the default provider to let users override it
+								array_unshift(
+									$providers,
+									new StringExpressionLanguageProvider()
+								);
+
+								parent::__construct($cache, $providers);
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Optimize : Use cache</h3>
+					<ul>
+						<li>
+							By default, cache is an ArrayAdapter
+							<br>
+							➜ cache only for the request lifetime
+						</li>
+						<li>
+							PSR-6 Cache adapter provided by Symfony :
+							<ul>
+								<li>APCU</li>
+								<li>Couchbase</li>
+								<li>Doctrine / PDO</li>
+								<li>File system</li>
+								<li>Memcached</li>
+								<li>Redis</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Optimize : What does the cache change ?</h3>
+					<p>Steps for expression evaluation :</p>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|3|5">
+						public function evaluate(Expression|string $expression, array $values = []): mixed
+						{
+							return $this->parse($expression, array_keys($values))
+								->getNodes()
+								->evaluate($this->functions, $values);
+						}
+					</code></pre>
+					<aside class="notes">
+						We have two interesting functions here : The first one, parse will create an Abstract Syntax Tree from the expression.
+						The Abstract Syntax Tree is the representation of the expression in objects usable by PHP.
+						When we have that, we can easily evaluate this sequence of variables and operations in the tree.
+					</aside>
+				</section>
+
+				<section>
+					<h3>Optimize : How to speed up evaluation ?</h3>
+					<p class="fragment r-fit-text">Removing evaluation</p>
+					<aside class="notes">
+						Does Symfony really evaluate the abstract syntax trees every time a request pop ? I don't think so.
+						Do we really need the evaluation ?
+						It is outside of the KYC use case, but If you are creating PHP code dynamically for cached proxy objects for example, it might be useful
+					</aside>
+				</section>
+
+				<section>
+					<h3>Compilation</h3>
+					<p>Evaluate</p>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="3">
+						public function evaluate(Expression|string $expression, array $values = []): mixed
+						{
+							return $this->parse($expression, array_keys($values))
+								->getNodes()
+								->evaluate($this->functions, $values);
+						}
+					</code></pre>
+
+					<p>Compile</p>
+					<pre data-id="compile"><code class="hljs php" data-trim data-line-numbers="3-5|4">
+						public function compile(Expression|string $expression, array $names = []): string
+						{
+							return $this->getCompiler()->compile(
+								$this->parse($expression, $names)->getNodes()
+							)->getSource();
+						}
+					</code></pre>
+
+					<p>Compile usage :</p>
+					<pre data-id="compile-example"><code class="hljs php" data-trim>
+						var_dump($expressionLanguage->compile('1 + 2')); // displays (1 + 2)
+					</code></pre>
+
+					<aside class="notes">
+						To compile, we still need the AST, but instead of evaluating with values, the tree is given to the compiler,
+						which create a runnable PHP code. Just see here, we don't have values, we have to provide values names that will be provided at run time
+					</aside>
+				</section>
+
+				<section>
+					<h3>Compilation</h3>
+
+					<p>Compile usage :</p>
+					<pre data-id="compile-example"><code class="hljs php" data-trim>
+						var_dump($expressionLanguage->compile('1 + 2'));
+					</code></pre>
+					<p>Output:</p>
+					<pre data-id="compile-example"><code class="hljs php" data-trim>
+						(1 + 2)
+					</code></pre>
+
+					<aside class="notes">
+						I took this example from symfony website, in fact it's a simple one.
+					</aside>
+				</section>
+
+				<section>
+					<h3>Compilation</h3>
+
+					<table>
+						<tr>
+							<th>Maiden Name</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>($user->getGender() === "woman")</code></pre>
+							</td>
+						</tr>
+						<tr>
+							<th>Corporate name</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>($user->getType() === "company")</code></pre>
+							</td>
+						</tr>
+						<tr>
+							<th>Siren</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>
+									($user->getType() === "company"
+									&&
+									$user->getCountry() === "FR")
+								</code></pre>
+							</td>
+						</tr>
+						<tr>
+							<th>Detailed explanations</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>
+									($user->getCountry() !== \substr($user->getIban(), 0, 2))
+								</code></pre>
+							</td>
+						</tr>
+						<tr>
+							<th>Funds origin</th>
+							<td>
+								<pre data-id="code-animation"><code class="hljs" data-trim>
+&nbsp;
+								</code></pre>
+							</td>
+						</tr>
+					</table>
+
+					<aside class="notes">
+						Again it is outside of the dynamic KYC form scope that I show you earlier, but you will see that it is failing.
+					</aside>
+				</section>
+
+				<section>
+					<h3>Compilation</h3>
+
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|12|17|18-19">
+						use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+						use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
+
+						class TransactionExpressionLanguageProvider
+							implements ExpressionFunctionProviderInterface
+						{
+							public function __construct(
+								private EntityManagerInterface $entityManager
+							) {
+							}
+
+							public function getFunctions(): array
+							{
+								return [
+									new ExpressionFunction(
+										// name
+										'getCumulatedInvestment',
+										// compiler
+										function() {return '';},
+										// evaluator
+										function ($arguments, $user): int {
+											return $this->entityManager
+												->getRepository(Transaction::class)
+												->getCumulatedInvestment($user);
+										}
+									)
+								];
+							}
+						}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Compilation</h3>
+
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|17-22|8-12|9">
+						return [
+							new ExpressionFunction(
+								// name
+								'getCumulatedInvestment',
+								// compiler
+								function($userArgumentName) {
+									return sprintf(
+										"(
+											$this->em
+											->getRepository(%2$s)
+											->getCumulatedInvestment(%1$s)
+										)",
+										$userArgumentName,
+										Transaction::class
+									);
+								},
+								// evaluator
+								function ($arguments, $user): int {
+									return $this->entityManager
+										->getRepository(Transaction::class)
+										->getCumulatedInvestment($user);
+								}
+							)
+						];
+					</code></pre>
+					<aside class="notes">
+						The compiler is a function that return a string representing PHP code that can do what the evaluator is doing.
+						So here we use sprintf to write the returned code without messy variables in string.
+						Just a warning. The compiled code will run in the context I will choose to write it.
+						I am using $this->em here BUT I need to provide it ba a way or another.
+						It'is not the EntityManager in the Function Provider.
+						Moreover it is not the same name.
+					</aside>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/zoom/zoom.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/search/search.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+
+			// Also available as an ES module, see:
+			// https://revealjs.com/initialization/
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				center: true,
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight ]
+			});
+
+		</script>
+
+	</body>
+</html>
