@@ -49,6 +49,16 @@
 					<p>
 						<img src="./images/sfcon-brussels2023.png" height="150"/>
 					</p>
+					<small>
+						By Rémi JANOT
+						<br>
+						<a href="https://www.linkedin.com/in/rjanot/" target="_blank">
+							<img src="./images/linkedin.png" height="26" style="margin: 0 !important;"/>
+						</a> |
+						<a href="mailto:%72%2e%6a%61%6e%6f%74%40%67%6d%61%69%6c%2e%63%6f%6d" target="_blank">
+							r<b style="display: none">.remove.this</b>.janot@gmail.com</span>
+						</a>
+					</small>
 				</section>
 
 				<section>
@@ -155,7 +165,7 @@
 					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|5-11|13-16|18-28|30-40">
 						namespace App\Entity;
 						// use ...
-						class KycQuestion
+						class Question
 						{
 							private ?int $id = null;
 
@@ -172,7 +182,7 @@
 
 							public function getQuestion(): ?string
 							{
-								return $this->kycStep;
+								return $this->question;
 							}
 
 							public function setQuestion(?string $question): self
@@ -380,7 +390,7 @@
 								return $toReturn;
 							}
 
-							public function isRelevant(KycQuestion $question, User $user): bool
+							public function isRelevant(Question $question, User $user): bool
 							{
 								switch($question->getCondition()) {
 									case 'isWoman':
@@ -429,7 +439,7 @@
 						{
 							//...
 
-							public function isRelevant(KycQuestion $question, User $user): bool
+							public function isRelevant(Question $question, User $user): bool
 							{
 								return eval($question->getCondition());
 							}
@@ -644,7 +654,7 @@
 						{
 							//...
 
-							public function isRelevant(KycQuestion $question, User $user): bool
+							public function isRelevant(Question $question, User $user): bool
 							{
 								// ExpressionLanguage evaluation here
 							}
@@ -656,7 +666,7 @@
 				</section>
 
 				<section>
-					<h3>4rd solution</h3>
+					<h3>4th solution</h3>
 					<ul>
 						<li><strike>Complex query</strike></li>
 						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
@@ -707,7 +717,7 @@
 							}
 							//...
 
-							public function isRelevant(KycQuestion $question, User $user): bool
+							public function isRelevant(Question $question, User $user): bool
 							{
 								return $this->expressionLanguage->evaluate(
 									$question->getCondition(),
@@ -893,7 +903,7 @@
 				</section>
 
 				<section>
-					<h3>4rd solution</h3>
+					<h3>4th solution</h3>
 					<ul>
 						<li><strike>Complex query</strike></li>
 						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
@@ -1160,8 +1170,30 @@
 						Just a warning. The compiled code will run in the context I will choose to write it.
 						I am using $this->em here BUT I need to provide it ba a way or another.
 						It'is not the EntityManager in the Function Provider.
-						Moreover it is not the same name.
+						Moreover, here, it is not the same name.
 					</aside>
+				</section>
+
+				<section>
+					<h3>Think out of the box</h3>
+
+					<ul>
+						<li>Determine form field visibility (in a dynamic form)</li>
+						<li>Discount codes (is applicable & amount)</li>
+						<li>Feature flags</li>
+						<li>CMS Page access control</li>
+					</ul>
+
+					<aside class="notes">
+						Here are some ways I used or I still use Expression Language
+					</aside>
+				</section>
+				<section>
+					<h3>Demo time</h3>
+					<p>
+						<img src="./images/sfcon-brussels2023.png" height="150"/>
+					</p>
+					<a href="https://github.com/rjanot/expression-language-sfcon2023-demo" target="_blank">Repository available here</a>
 				</section>
 			</div>
 
