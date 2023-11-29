@@ -59,6 +59,21 @@
 							r<b style="display: none">.remove.this</b>.janot@gmail.com</span>
 						</a>
 					</small>
+					<aside class="notes">
+						<p>Hello everybody!</p>
+						<p>Do you ear me?</p>
+
+						<p>Welcome ! For the next thirty minutes, we will talk about Expression Language and how you can use it to make your features highly customizable</p>
+					</aside>
+				</section>
+
+				<section>
+					<h3 style="margin-bottom: 0">1.</h3>
+					<h4 style="margin-bottom: 80px">What is the problem?</h4>
+					<h3 style="margin-bottom: 0">2.</h3>
+					<h4 style="margin-bottom: 80px">How can Expression Language help me?</h4>
+					<h3 style="margin-bottom: 0">3.</h3>
+					<h4 style="margin-bottom: 80px">Demo time</h4>
 				</section>
 
 				<section>
@@ -86,10 +101,12 @@
 						</tr>
 					</table>
 					<aside class="notes">
-						That explains my English accent. Just to be sure, does everybody understand me?
+						<p>But before that, A little bit about me</p>
 
-						- Fun fact, my city has a binary postal code
-						- The Titanic, my personal biggest Lego, more than 9 thousands bricks
+						<ul>
+							<li><p>I come from France, and that may explain my English accent. Just to be sure, does everybody understand me? A Fun fact about my city: the postal code is binary: 10100</p></li>
+							<li>I'am fan of Legos, The Titanic, my personal biggest one, is more than 9 thousands bricks</li>
+							<li>In my free time, I stop speaking to computer and I get on stage, speaking to humans</li>
 					</aside>
 				</section>
 
@@ -141,15 +158,15 @@
 				</section>
 
 				<section>
-					<h3>What does Vasco.fund do ?</h3>
+					<h3>What does Vasco.fund do?</h3>
 					<p class="fragment">
-						Vasco is a software dedicated to private banking and small & medium asset managers ;
+						Vasco is a software dedicated to private banking and small & medium asset managers
 					</p>
 					<p class="fragment">
-						These professions are required to ask many financial questions : KYC (Know Your Customer) ;
+						These professions are required to ask many financial questions: KYC (Know Your Customer)
 					</p>
 					<p class="fragment">
-						They have plenty of questions to ask.
+						They have plenty of questions to ask
 					</p>
 
 					<aside class="notes">
@@ -227,7 +244,7 @@
 				</section>
 
 				<section>
-					<h3>What are cases X, Y and Z ?</h3>
+					<h3>What are cases X, Y and Z?</h3>
 					<table>
 						<tr>
 							<th>Ask for ...</th>
@@ -255,10 +272,10 @@
 						</tr>
 					</table>
 					<aside class="notes">
-						We can have simple conditions, depending on the entity we are filling:
-						You can have conditions with logical operators : is a Company AND fiscal address in France
-						You can also have conditions that depends on totally different objects
-						You can also have some conditions extracting data before comparison
+						<p>We can have simple conditions, depending on the entity we are filling:</p>
+						<p>You can have conditions with logical operators: is a Company AND fiscal address in France</p>
+						<p>You can also have conditions that depends on totally different objects</p>
+						<p>You can also have some conditions extracting data before comparison</p>
 					</aside>
 				</section>
 
@@ -307,12 +324,12 @@
 						)
 						OR
 						(
-							kyc_question.condition == 'hasInvestedMoreThan100k'
+							kyc_question.condition == 'hasInvestedMoreThan1M'
 							AND (
 								SELECT 1
 								FROM user
 								WHERE id=:loggedInUserId
-								AND cumulatedInvestment >= 100000
+								AND cumulatedInvestment >= 1000000
 							)
 						)
 						OR
@@ -330,7 +347,7 @@
 
 					<aside class="notes">
 						It works !
-						Any ideas for the next step ?
+						Any ideas for the next step?
 					</aside>
 				</section>
 
@@ -354,13 +371,23 @@
 					</aside>
 				</section>
 
-				<section>
+				<section data-auto-animate>
 					<h3>Drawback of the 1st solution 🤔</h3>
 					<ul>
 						<li>Complex query</li>
+						<li>Need a release to add a new condition</li>
 						<li>Many dead code depending on the SaaS configuration</li>
 						<li>Need a developer to add a new condition</li>
+					</ul>
+				</section>
+
+				<section data-auto-animate>
+					<h3>2nd solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
 						<li>Need a release to add a new condition</li>
+						<li>Many dead code depending on the SaaS configuration</li>
+						<li>Need a developer to add a new condition</li>
 					</ul>
 				</section>
 
@@ -376,7 +403,7 @@
 
 				<section data-auto-animate>
 					<h3 data-id="code-title">Create the question repository</h3>
-					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|3-13|8|15-30">
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|3-13|7-9|15-30">
 						class QuestionRepository
 						{
 							public function findQuestionsForUser(User $user)
@@ -399,8 +426,8 @@
 										return $user->getType() === 'company';
 									case 'isFrenchCompany':
 										return $user->getType() === 'company' && $user->getCountry() === 'FR';
-									case 'hasInvestedMoreThan100k€':
-										return $user->getCumulatedInvestment() >= 100000;
+									case 'hasInvestedMoreThan1M':
+										return $user->getCumulatedInvestment() >= 1000000;
 									case 'sameCountry':
 										return $user->getCountry() !== substr($user->getIban(), 0, 2);
 								}
@@ -414,9 +441,9 @@
 					<h3>2nd solution</h3>
 					<ul>
 						<li><strike>Complex query</strike></li>
+						<li>Need a release to add a new condition</li>
 						<li>Many dead code depending on the SaaS configuration</li>
 						<li>Need a developer to add a new condition</li>
-						<li>Need a release to add a new condition</li>
 					</ul>
 				</section>
 
@@ -424,12 +451,12 @@
 					<h3>3rd solution</h3>
 					<ul>
 						<li><strike>Complex query</strike></li>
-						<li>Many dead code depending on the SaaS configuration</li>
-						<li>Need a developer to add a new condition</li>
 						<li>
 							<strike>Need a release to add a new condition</strike><br>
 							<em>⇒ put the PHP condition code in the DB</em>
 						</li>
+						<li>Many dead code depending on the SaaS configuration</li>
+						<li>Need a developer to add a new condition</li>
 					</ul>
 				</section>
 
@@ -451,11 +478,11 @@
 					<h3>3rd solution</h3>
 					<ul>
 						<li><strike>Complex query</strike></li>
-						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
-						<li>Need a developer to add a new condition</li>
 						<li>
 							<strike>Need a release to add a new condition</strike>
 						</li>
+						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
+						<li>Need a developer to add a new condition</li>
 					</ul>
 				</section>
 
@@ -465,14 +492,14 @@
 					<p class="fragment">Dangerous functions accessible, can alter system files</p>
 
 					<aside class="notes">
-						Why do you have a huge security issue ?
+						<p>Why do you have a huge security issue?</p>
 
-						Because your PHP code will not be executed in a safe environment
-						If someone succeed to put his own PHP code in your DB, you are dead. The hacker can delete file, send customer files to him, read your passwords and other secrets
+						<p>Because your PHP code will not be executed in a safe environment</p>
+						<p>If someone succeed to put his own PHP code in your DB, you are dead. The hacker can delete file, stole customer files by sending them to him, read your passwords and other secrets</p>
 
-						NEVER DO THAT
+						<p>NEVER DO THAT</p>
 
-						By the way, I hope you knew that before coming here
+						<p>By the way, I hope you knew that before coming here</p>
 					</aside>
 				</section>
 
@@ -500,7 +527,7 @@
 					</footer>
 
 					<aside class="notes">
-						I can not find when and where Fabien said that, but I agree with that
+						I can not find when and where Fabien said that, but I agree with that too
 					</aside>
 				</section>
 
@@ -511,7 +538,7 @@
 							Really simple programmation language
 							<ul>
 								<li>Only one liner</li>
-								<li>A very restricted PHP sandbox : No functions given by default</li>
+								<li>A very restricted PHP sandbox: No functions given by default</li>
 							</ul>
 						</li>
 						<li class="fragment">
@@ -578,7 +605,7 @@
 				<section data-auto-animate>
 					<h4>Usage of ExpressionLanguage in Symfony Core</h4>
 					<h6 style="font-style: italic">Routing</h6>
-					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="11-14|17">
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="11-14">
 						namespace App\Controller;
 
 						use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -593,9 +620,6 @@
 									context.getMethod() in ['GET', 'HEAD']
 									and request.headers.get('User-Agent') matches '/firefox/i'
 								",
-
-								// expressions can also include config parameters:
-								// condition: "request.headers.get('User-Agent') matches '%app.allowed_browsers%'"
 							)]
 							public function contact()
 							{
@@ -649,7 +673,7 @@
 				</section>
 
 				<section data-auto-animate>
-					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|7">
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers>
 						class QuestionRepository
 						{
 							//...
@@ -665,18 +689,31 @@
 					</aside>
 				</section>
 
-				<section>
-					<h3>4th solution</h3>
+				<section data-auto-animate>
+					<h3>3rd solution</h3>
 					<ul>
 						<li><strike>Complex query</strike></li>
-						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
-						<li>Need a developer to add a new condition</li>
 						<li>
 							<strike>Need a release to add a new condition</strike>
 						</li>
+						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
+						<li>Critical security issue
+						<li>Need a developer to add a new condition</li>
+					</ul>
+				</section>
+
+				<section data-auto-animate>
+					<h3>4th solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
+						<li>
+							<strike>Need a release to add a new condition</strike>
+						</li>
+						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
 						<li>
 							<strike>Critical security issue</strike>
 						</li>
+						<li>Need a developer to add a new condition</li>
 					</ul>
 					<aside class="notes">
 						And as it is secured, I won't have the critical security issue anymore
@@ -684,7 +721,7 @@
 				</section>
 
 				<section data-auto-animate>
-					<h3 data-id="code-title">Create your own Expression Language</h3>
+					<h3 data-id="code-title">Create your own Expression Language component</h3>
 					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="7|4-5|9-14">
 						namespace App\Service;
 
@@ -730,11 +767,11 @@
 						}
 					</code></pre>
 					<aside class="notes">
-						We inject our new service in the repository
-						And update isRelevant to use it. We give the question's condition as the expression to evaluate
-						And we give some context.
-						Important the context is using normalized values, it meens it is some associative arrays.
-						If you give the object, you can call getters. But you could also call setters and it might be a good idea only in some rare edge cases.
+						<p>We inject our new service in the repository</p>
+						<p>And update isRelevant to use it. We give the question's condition as the expression to evaluate</p>
+						<p>And we give some context.</p>
+						<p>Important the context is using normalized values, it meens it is some associative arrays.</p>
+						<p>If you give the object, you can call getters. But you could also call setters and it might be a good idea only in some rare edge cases.</p>
 					</aside>
 				</section>
 
@@ -748,22 +785,22 @@
 						<tr>
 							<th>Maiden Name</th>
 							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>user.getGender() === 'woman'</code></pre>
+								<pre data-id="code-animation"><code class="hljs" data-trim>user["gender"] === "woman"</code></pre>
 							</td>
 						</tr>
 						<tr>
 							<th>Corporate name</th>
 							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>user.getType() === 'company'</code></pre>
+								<pre data-id="code-animation"><code class="hljs" data-trim>user["type"] === "company"</code></pre>
 							</td>
 						</tr>
 						<tr>
 							<th>Siren</th>
 							<td>
 								<pre data-id="code-animation"><code class="hljs" data-trim>
-									user.getType() === 'company'
+									user["type"] == "company"
 									and
-									user.getCountry() === 'FR'
+									user["country"] == "FR"
 								</code></pre>
 							</td>
 						</tr>
@@ -781,7 +818,7 @@
 							<th>Funds origin</th>
 							<td>
 								<pre data-id="code-animation"><code class="hljs" data-trim>
-									getCumulatedInvestment(user) >= 100000
+									getCumulatedInvestment(user["id"]) >= 1000000
 								</code></pre>
 							</td>
 						</tr>
@@ -789,7 +826,7 @@
 							<th>Detailed explanations</th>
 							<td>
 								<pre data-id="code-animation"><code class="hljs" data-trim>
-									user.getCountry() !== substr(user.getIban(), 0, 2)
+									user["country"] !== substr(user["iban"], 0, 2)
 								</code></pre>
 							</td>
 						</tr>
@@ -797,9 +834,30 @@
 				</section>
 
 				<section>
+					<h3>4th solution</h3>
+					<ul>
+						<li><strike>Complex query</strike></li>
+						<li>
+							<strike>Need a release to add a new condition</strike>
+						</li>
+						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
+						<li>
+							<strike>Critical security issue</strike>
+						</li>
+						<li>
+							Need <strike>a developer</strike> someone knowing a little about the database schema / objects given and understanding this simple language to add a new condition
+
+						</li>
+					</ul>
+					<aside class="notes">
+						This folk is easy to find: it may be you product owner, your customer success manager, and of course, it may still be a developper
+					</aside>
+				</section>
+
+				<section>
 					<h3>SyntaxError</h3>
-					<p>The function "getCumulatedInvestment" does not exist around position 1 for expression `getCumulatedInvestment(user) >= 100000`.</p>
-					<p>The function "substr" does not exist around position 26 for expression `account.getCountry() !== substr(account.getIban(), 0, 2)`.</p>
+					<p>The function "getCumulatedInvestment" does not exist around position 1 for expression `getCumulatedInvestment(user["id"]) >= 1000000`.</p>
+					<p>The function "substr" does not exist around position 20 for expression `user["country"] !== substr(user["iban"], 0, 2)`.</p>
 				</section>
 
 				<section>
@@ -822,7 +880,7 @@
 						}
 					</code></pre>
 					<aside class="notes">
-						remember of this constructor ? The second parameter is a list of providers. But what does it provide ? If it was providing carots and cauliflower, we could stop world hunder.
+						remember of this constructor? The second parameter is a list of providers. But what does it provide? If it was providing carots and cauliflower, we could stop world hunder.
 						But in fact it provides functions.
 						that's where I can define getCumulatedInvestment or substr functions
 					</aside>
@@ -831,7 +889,7 @@
 				<section>
 					<h3>Group your functions in Providers</h3>
 
-					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="4-5|7|9-11|10">
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="4-5|7|9-11">
 						use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 						use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
 
@@ -885,8 +943,8 @@
 				</section>
 
 				<section data-auto-animate>
-					<h3 data-id="code-title">Create your own Expression Language</h3>
-					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="2|3|5-6">
+					<h3 data-id="code-title">Create your own Expression Language component</h3>
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="2|3|5-7">
 					services:
 						expressionLanguage.kyc:
 							class: App\Service\ExpressionLanguage
@@ -902,29 +960,8 @@
 					</aside>
 				</section>
 
-				<section>
-					<h3>4th solution</h3>
-					<ul>
-						<li><strike>Complex query</strike></li>
-						<li><strike>Many dead code depending on the SaaS configuration</strike></li>
-						<li>
-							Need <strike>a developer</strike> someone knowing a little about the database schema / objects given and understanding this simple language to add a new condition
-
-						</li>
-						<li>
-							<strike>Need a release to add a new condition</strike>
-						</li>
-						<li>
-							<strike>Critical security issue</strike>
-						</li>
-					</ul>
-					<aside class="notes">
-						And as it is secured, I won't have the critical security issue anymore
-					</aside>
-				</section>
-
 				<section data-auto-animate>
-					<h3>Optimize : Use cache</h3>
+					<h3>Optimize: Use cache</h3>
 					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="10">
 						namespace App\Service;
 
@@ -951,7 +988,7 @@
 				</section>
 
 				<section>
-					<h3>Optimize : Use cache</h3>
+					<h3>Optimize: Use cache</h3>
 					<ul>
 						<li>
 							By default, cache is an ArrayAdapter
@@ -959,7 +996,7 @@
 							➜ cache only for the request lifetime
 						</li>
 						<li>
-							PSR-6 Cache adapter provided by Symfony :
+							PSR-6 Cache adapter provided by Symfony:
 							<ul>
 								<li>APCU</li>
 								<li>Couchbase</li>
@@ -973,8 +1010,8 @@
 				</section>
 
 				<section>
-					<h3>Optimize : What does the cache change ?</h3>
-					<p>Steps for expression evaluation :</p>
+					<h3>Optimize: What does the cache change?</h3>
+					<p>Steps for expression evaluation:</p>
 					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|3|5">
 						public function evaluate(Expression|string $expression, array $values = []): mixed
 						{
@@ -984,18 +1021,18 @@
 						}
 					</code></pre>
 					<aside class="notes">
-						We have two interesting functions here : The first one, parse will create an Abstract Syntax Tree from the expression.
+						We have two interesting functions here: The first one, parse will create an Abstract Syntax Tree from the expression.
 						The Abstract Syntax Tree is the representation of the expression in objects usable by PHP.
 						When we have that, we can easily evaluate this sequence of variables and operations in the tree.
 					</aside>
 				</section>
 
 				<section>
-					<h3>Optimize : How to speed up evaluation ?</h3>
+					<h3>Optimize: How to speed up evaluation?</h3>
 					<p class="fragment r-fit-text">Removing evaluation</p>
 					<aside class="notes">
-						Does Symfony really evaluate the abstract syntax trees every time a request pop ? I don't think so.
-						Do we really need the evaluation ?
+						Does Symfony really evaluate the abstract syntax trees every time a request pop? I don't think so.
+						Do we really need the evaluation?
 						It is outside of the KYC use case, but If you are creating PHP code dynamically for cached proxy objects for example, it might be useful
 					</aside>
 				</section>
@@ -1022,11 +1059,6 @@
 						}
 					</code></pre>
 
-					<p>Compile usage :</p>
-					<pre data-id="compile-example"><code class="hljs php" data-trim>
-						var_dump($expressionLanguage->compile('1 + 2')); // displays (1 + 2)
-					</code></pre>
-
 					<aside class="notes">
 						To compile, we still need the AST, but instead of evaluating with values, the tree is given to the compiler,
 						which create a runnable PHP code. Just see here, we don't have values, we have to provide values names that will be provided at run time
@@ -1036,7 +1068,7 @@
 				<section>
 					<h3>Compilation</h3>
 
-					<p>Compile usage :</p>
+					<p>Compile usage:</p>
 					<pre data-id="compile-example"><code class="hljs php" data-trim>
 						var_dump($expressionLanguage->compile('1 + 2'));
 					</code></pre>
@@ -1057,22 +1089,22 @@
 						<tr>
 							<th>Maiden Name</th>
 							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>($user->getGender() === "woman")</code></pre>
+								<pre data-id="code-animation"><code class="hljs" data-trim>($user["gender"] === "woman")</code></pre>
 							</td>
 						</tr>
 						<tr>
 							<th>Corporate name</th>
 							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>($user->getType() === "company")</code></pre>
+								<pre data-id="code-animation"><code class="hljs" data-trim>($user["type"] === "company")</code></pre>
 							</td>
 						</tr>
 						<tr>
 							<th>Siren</th>
 							<td>
 								<pre data-id="code-animation"><code class="hljs" data-trim>
-									($user->getType() === "company"
+									($user["type"] === "company"
 									&&
-									$user->getCountry() === "FR")
+									$user["country"] === "FR")
 								</code></pre>
 							</td>
 						</tr>
@@ -1080,7 +1112,7 @@
 							<th>Detailed explanations</th>
 							<td>
 								<pre data-id="code-animation"><code class="hljs" data-trim>
-									($user->getCountry() !== \substr($user->getIban(), 0, 2))
+									($user["country"] !== \substr($user["iban"], 0, 2))
 								</code></pre>
 							</td>
 						</tr>
