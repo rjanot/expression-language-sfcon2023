@@ -264,7 +264,7 @@
 						</tr>
 						<tr>
 							<th>Funds origin</th>
-							<td>Has invested more than 100k€</td>
+							<td>Has invested more than 1M€</td>
 						</tr>
 						<tr>
 							<th>Detailed explanations</th>
@@ -562,7 +562,8 @@
 
 							App\Mailer:
 								# the '@=' prefix is required when using expressions for arguments in YAML files
-								arguments: ['@=service("App\\Mail\\MailerConfiguration").getMailerMethod()']
+								arguments:
+									- '@=service("App\\Mail\\MailerConfiguration").getMailerMethod()'
 
 								# when using double-quoted strings, the backslash needs to be escaped twice (see https://yaml.org/spec/1.2/spec.html#id2787109)
 								# arguments: ["@=service('App\\\\Mail\\\\MailerConfiguration').getMailerMethod()"]
@@ -798,9 +799,9 @@
 							<th>Siren</th>
 							<td>
 								<pre data-id="code-animation"><code class="hljs" data-trim>
-									user["type"] == "company"
+									user["type"] === "company"
 									and
-									user["country"] == "FR"
+									user["country"] === "FR"
 								</code></pre>
 							</td>
 						</tr>
@@ -944,7 +945,7 @@
 
 				<section data-auto-animate>
 					<h3 data-id="code-title">Create your own Expression Language component</h3>
-					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="2|3|5-7">
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="2|3|5-7|8|12">
 					services:
 						expressionLanguage.kyc:
 							class: App\Service\ExpressionLanguage
@@ -952,11 +953,34 @@
 								$providers:
 									- '@App\ELProvider\TransactionExpressionLanguageProvider'
 									- '@App\ELProvider\StringExpressionLanguageProvider'
+						expressionLanguage.featureFlag:
+							class: App\Service\ExpressionLanguage
+							arguments:
+								$providers:
+									- '@App\ELProvider\StringExpressionLanguageProvider'
 					</code></pre>
 					<aside class="notes">
 						The StringExpressionLanguageProvider May be injected in every ExpressionLanguage usages.
 						The provider in itself does not depends on anything else (no entity manager for example)
 						So we could choose to inject it in the Expression Language Constructor
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<h3>Performance</h3>
+					<img src="images/performance.png"/>
+					<aside class="notes">
+						<p>What I show here is the time for the evaluation of the expression.</p>
+						<p>I had to put the threshold at 0ms (by default is 1ms) in the webprofiler performance tab to be able to see the durations</p>
+					</aside>
+				</section>
+
+				<section data-auto-animate>
+					<h3>We have did it !</h3>
+					<p>🚀</p>
+					<aside class="notes">
+						<p>We have dit it, we have one hundred percent production ready code.</p>
+						<p>I will get you a little bit deeper, but it's not necessary</p>
 					</aside>
 				</section>
 
@@ -975,16 +999,13 @@
 								CacheItemPoolInterface $cache = null,
 								array $providers = []
 							) {
-								// prepends the default provider to let users override it
-								array_unshift(
-									$providers,
-									new StringExpressionLanguageProvider()
-								);
-
 								parent::__construct($cache, $providers);
 							}
 						}
 					</code></pre>
+					<aside class="notes">
+						<p>With the expressions shown earlier, it is fast enough for me, and I don't need to use the cache.</p>
+					</aside>
 				</section>
 
 				<section>
@@ -1021,15 +1042,40 @@
 						}
 					</code></pre>
 					<aside class="notes">
-						We have two interesting functions here: The first one, parse will create an Abstract Syntax Tree from the expression.
+						<p>We have two interesting steps here:</p>
+						<p>The parsing</p>
+						<p>And the evaluation</p>
+					</aside>
+				</section>
+
+				<section>
+					<h3>Optimize: What does the cache change?</h3>
+					<h4 style="font-family: 'Courier New'; text-transform: none">parse()</h4>
+					<p>The parse function take the expression language and create PHP objects acting like the expression</p>
+					<p>
+						These PHP objects are an
+						<a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">Abstract Syntax Tree</a>
+					</p>
+					<aside class="notes">
 						The Abstract Syntax Tree is the representation of the expression in objects usable by PHP.
 						When we have that, we can easily evaluate this sequence of variables and operations in the tree.
 					</aside>
 				</section>
 
 				<section>
+					<img src="images/ast.png"/>
+					<aside class="notes">
+						These objects are easy to serialize and can be saved by a cache provider
+					</aside>
+				</section>
+
+				<section>
+					<span class="r-fit-text">&lt;aside&gt;</span>
+				</section>
+
+				<section>
 					<h3>Optimize: How to speed up evaluation?</h3>
-					<p class="fragment r-fit-text">Removing evaluation</p>
+					<p class="fragment r-fit-text">Removing AST evaluation</p>
 					<aside class="notes">
 						Does Symfony really evaluate the abstract syntax trees every time a request pop? I don't think so.
 						Do we really need the evaluation?
@@ -1039,171 +1085,51 @@
 
 				<section>
 					<h3>Compilation</h3>
-					<p>Evaluate</p>
-					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="3">
-						public function evaluate(Expression|string $expression, array $values = []): mixed
+					<p class="fragment">When Symfony is building its cache, some PHP files are created (the container, the router, ...)</p>
+					<p class="fragment">Symfony take expressions given in yaml or attributes and compile them to have a runnable PHP code</p>
+					<p class="fragment">This PHP code is written in cached PHP files</p>
+					<p class="fragment">This PHP code is executed at runtime, but as it is PHP code it is faster than evaluating the AST</p>
+				</section>
+
+				<section>
+					<h3>Compilation</h3>
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="5">
+						services:
+							# ...
+							App\Mailer:
+								arguments:
+									- '@=service("App\\Mail\\MailerConfiguration").getMailerMethod()'
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Compilation</h3>
+					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="15-18">
+					/**
+					 * @internal This class has been auto-generated by the Symfony Dependency Injection Component.
+					 */
+					class getMailerService extends App_KernelDevDebugContainer
+					{
+						/**
+						 * Gets the private 'App\Mailer' shared autowired service.
+						 *
+						 * @return \App\Mailer
+						 */
+						public static function do($container, $lazyLoad = true)
 						{
-							return $this->parse($expression, array_keys($values))
-								->getNodes()
-								->evaluate($this->functions, $values);
+							include_once \dirname(__DIR__, 4).'/src/Mailer.php';
+
+							return $container->privates['App\\Mailer'] =
+								new \App\Mailer(
+									$container->get("App\\Mail\\MailerConfiguration")->getMailerMethod()
+								);
 						}
-					</code></pre>
-
-					<p>Compile</p>
-					<pre data-id="compile"><code class="hljs php" data-trim data-line-numbers="3-5|4">
-						public function compile(Expression|string $expression, array $names = []): string
-						{
-							return $this->getCompiler()->compile(
-								$this->parse($expression, $names)->getNodes()
-							)->getSource();
-						}
-					</code></pre>
-
-					<aside class="notes">
-						To compile, we still need the AST, but instead of evaluating with values, the tree is given to the compiler,
-						which create a runnable PHP code. Just see here, we don't have values, we have to provide values names that will be provided at run time
-					</aside>
-				</section>
-
-				<section>
-					<h3>Compilation</h3>
-
-					<p>Compile usage:</p>
-					<pre data-id="compile-example"><code class="hljs php" data-trim>
-						var_dump($expressionLanguage->compile('1 + 2'));
-					</code></pre>
-					<p>Output:</p>
-					<pre data-id="compile-example"><code class="hljs php" data-trim>
-						(1 + 2)
-					</code></pre>
-
-					<aside class="notes">
-						I took this example from symfony website, in fact it's a simple one.
-					</aside>
-				</section>
-
-				<section>
-					<h3>Compilation</h3>
-
-					<table>
-						<tr>
-							<th>Maiden Name</th>
-							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>($user["gender"] === "woman")</code></pre>
-							</td>
-						</tr>
-						<tr>
-							<th>Corporate name</th>
-							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>($user["type"] === "company")</code></pre>
-							</td>
-						</tr>
-						<tr>
-							<th>Siren</th>
-							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>
-									($user["type"] === "company"
-									&&
-									$user["country"] === "FR")
-								</code></pre>
-							</td>
-						</tr>
-						<tr>
-							<th>Detailed explanations</th>
-							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>
-									($user["country"] !== \substr($user["iban"], 0, 2))
-								</code></pre>
-							</td>
-						</tr>
-						<tr>
-							<th>Funds origin</th>
-							<td>
-								<pre data-id="code-animation"><code class="hljs" data-trim>
-&nbsp;
-								</code></pre>
-							</td>
-						</tr>
-					</table>
-
-					<aside class="notes">
-						Again it is outside of the dynamic KYC form scope that I show you earlier, but you will see that it is failing.
-					</aside>
-				</section>
-
-				<section>
-					<h3>Compilation</h3>
-
-					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|12|17|18-19">
-						use Symfony\Component\ExpressionLanguage\ExpressionFunction;
-						use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
-
-						class TransactionExpressionLanguageProvider
-							implements ExpressionFunctionProviderInterface
-						{
-							public function __construct(
-								private EntityManagerInterface $entityManager
-							) {
-							}
-
-							public function getFunctions(): array
-							{
-								return [
-									new ExpressionFunction(
-										// name
-										'getCumulatedInvestment',
-										// compiler
-										function() {return '';},
-										// evaluator
-										function ($arguments, $user): int {
-											return $this->entityManager
-												->getRepository(Transaction::class)
-												->getCumulatedInvestment($user);
-										}
-									)
-								];
-							}
-						}
+					}
 					</code></pre>
 				</section>
 
 				<section>
-					<h3>Compilation</h3>
-
-					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|17-22|8-12|9">
-						return [
-							new ExpressionFunction(
-								// name
-								'getCumulatedInvestment',
-								// compiler
-								function($userArgumentName) {
-									return sprintf(
-										"(
-											$this->em
-											->getRepository(%2$s)
-											->getCumulatedInvestment(%1$s)
-										)",
-										$userArgumentName,
-										Transaction::class
-									);
-								},
-								// evaluator
-								function ($arguments, $user): int {
-									return $this->entityManager
-										->getRepository(Transaction::class)
-										->getCumulatedInvestment($user);
-								}
-							)
-						];
-					</code></pre>
-					<aside class="notes">
-						The compiler is a function that return a string representing PHP code that can do what the evaluator is doing.
-						So here we use sprintf to write the returned code without messy variables in string.
-						Just a warning. The compiled code will run in the context I will choose to write it.
-						I am using $this->em here BUT I need to provide it ba a way or another.
-						It'is not the EntityManager in the Function Provider.
-						Moreover, here, it is not the same name.
-					</aside>
+					<span class="r-fit-text">&lt;/aside&gt;</span>
 				</section>
 
 				<section>
