@@ -177,6 +177,25 @@
 					</aside>
 				</section>
 
+				<section>
+					<h3>Monday 10 a.m.</h3>
+					<p class="fragment">
+						<small>« Hey Rémi ! 👋 Customer A would like to have a question only in case X »</small>
+					</p>
+					<div class="fragment">
+						<h3>Tuesday 2 p.m.</h3>
+						<p>
+							<small>« Hey Rémi ! 👋 Customer B would like to have a question only in case Y »</small>
+						</p>
+					</div>
+					<div class="fragment">
+						<h3>Wednesday 11 a.m.</h3>
+						<p>
+							<small>« Hey Rémi ! 👋 Customer C would like to have a question only in case Z »</small>
+						</p>
+					</div>
+				</section>
+
 				<section data-auto-animate>
 					<h3 data-id="code-title">Create the question entity</h3>
 					<pre data-id="code-animation"><code class="hljs php" data-trim data-line-numbers="|5-11|13-16|18-28|30-40">
@@ -222,25 +241,6 @@
 							}
 						}
 					</code></pre>
-				</section>
-
-				<section>
-					<h3>Monday 10 a.m.</h3>
-					<p class="fragment">
-						<small>« Hey Rémi ! 👋 Customer A would like to have a question only in case X »</small>
-					</p>
-					<div class="fragment">
-						<h3>Tuesday 2 p.m.</h3>
-						<p>
-							<small>« Hey Rémi ! 👋 Customer B would like to have a question only in case Y »</small>
-						</p>
-					</div>
-					<div class="fragment">
-						<h3>Wednesday 11 a.m.</h3>
-						<p>
-							<small>« Hey Rémi ! 👋 Customer C would like to have a question only in case Z »</small>
-						</p>
-					</div>
 				</section>
 
 				<section>
@@ -554,7 +554,7 @@
 				<section data-auto-animate>
 					<h4>Usage of ExpressionLanguage in Symfony Core</h4>
 					<h6 style="font-style: italic">Dependency Injection</h6>
-					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="8">
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="9">
 						services:
 							# ...
 
@@ -730,7 +730,7 @@
 						use Symfony\Component\ExpressionLanguage\ExpressionLanguage
 							as BaseExpressionLanguage;
 
-						class ExpressionLanguage extends BaseExpressionLanguage
+						class QuestionExpressionLanguage extends BaseExpressionLanguage
 						{
 							public function __construct(
 								CacheItemPoolInterface $cache = null,
@@ -748,7 +748,7 @@
 						class QuestionRepository
 						{
 							public function __construct(
-								private \App\Service\ExpressionLanguage $expressionLanguage,
+								private \App\Service\QuestionExpressionLanguage $expressionLanguage,
 								private \Symfony\Component\Serializer\NormalizerNormalizerInterface $normalizer
 							)
 							{
@@ -870,7 +870,7 @@
 						use Symfony\Component\ExpressionLanguage\ExpressionLanguage
 							as BaseExpressionLanguage;
 
-						class ExpressionLanguage extends BaseExpressionLanguage
+						class QuestionExpressionLanguage extends BaseExpressionLanguage
 						{
 							public function __construct(
 								CacheItemPoolInterface $cache = null,
@@ -945,16 +945,14 @@
 
 				<section data-auto-animate>
 					<h3 data-id="code-title">Create your own Expression Language component</h3>
-					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="2|3|5-7|8|12">
+					<pre data-id="code-animation"><code class="hljs yaml" data-trim data-line-numbers="2|4-6|7|10">
 					services:
-						expressionLanguage.kyc:
-							class: App\Service\ExpressionLanguage
+						App\Service\QuestionExpressionLanguage:
 							arguments:
 								$providers:
 									- '@App\ELProvider\TransactionExpressionLanguageProvider'
 									- '@App\ELProvider\StringExpressionLanguageProvider'
-						expressionLanguage.featureFlag:
-							class: App\Service\ExpressionLanguage
+						App\Service\FeatureFlagExpressionLanguage:
 							arguments:
 								$providers:
 									- '@App\ELProvider\StringExpressionLanguageProvider'
@@ -993,7 +991,7 @@
 						use Symfony\Component\ExpressionLanguage\ExpressionLanguage
 							as BaseExpressionLanguage;
 
-						class ExpressionLanguage extends BaseExpressionLanguage
+						class QuestionExpressionLanguage extends BaseExpressionLanguage
 						{
 							public function __construct(
 								CacheItemPoolInterface $cache = null,
@@ -1051,7 +1049,7 @@
 				<section>
 					<h3>Optimize: What does the cache change?</h3>
 					<h4 style="font-family: 'Courier New'; text-transform: none">parse()</h4>
-					<p>The parse function takes the expression language and creates PHP objects acting like the expression</p>
+					<p>The parse function takes the expression string and creates PHP objects acting like the expression</p>
 					<p>
 						These PHP objects are an
 						<a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">Abstract Syntax Tree</a>
@@ -1064,6 +1062,10 @@
 
 				<section>
 					<img src="images/ast.png"/>
+				</section>
+
+				<section>
+					<img src="images/ast-dump.png"/>
 					<aside class="notes">
 						These objects are easy to serialize and can be saved by a cache provider
 					</aside>
